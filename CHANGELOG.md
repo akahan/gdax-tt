@@ -1,4 +1,24 @@
 # Change Log
+## 0.1.28
+* Lots of bugfixes
+* Added `RobustCalculator`, `FailoverCalculator` and `FailoverProvider` to FXService
+
+## 0.1.21
+* Bugfixes (#64)
+* Don't leak API keys in logs (see `Messages.sanitizeMessage`)
+* Update some package indices
+* CCXT Historical Data Retrieval Methods (thanks @Ameobea)
+
+## 0.1.20
+
+* Add BitMex live feed
+* Add CryptoProvider (exchange rates)
+* Add RobustCalculator (exchange rates)
+* `Trader` should handle Market orders better
+
+## v0.1.19
+
+* Bugfixes
 
 ## v0.1.18
 

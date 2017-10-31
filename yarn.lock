@@ -417,9 +417,9 @@ caseless@~0.12.0:
   version "0.12.0"
   resolved "https://registry.yarnpkg.com/caseless/-/caseless-0.12.0.tgz#1b681c21ff84033c826543090689420d187151dc"
 
-ccxt@^1.6.72:
-  version "1.6.72"
-  resolved "https://registry.yarnpkg.com/ccxt/-/ccxt-1.6.72.tgz#16bc304fe40078974ebb9723cc24d943a5fd25ce"
+ccxt@1.9.275:
+  version "1.9.275"
+  resolved "https://registry.yarnpkg.com/ccxt/-/ccxt-1.9.275.tgz#e66abca58c020ffeb9fa95d869b2ab9fd03e2094"
   dependencies:
     crypto-js "3.1.9-1"
     node-fetch "2.0.0-alpha.8"
@@ -2467,6 +2467,10 @@ simple-get@^2.5.1:
 simple-mock@0.8.0:
   version "0.8.0"
   resolved "https://registry.yarnpkg.com/simple-mock/-/simple-mock-0.8.0.tgz#49c9a223fa6eea8e2c4fd6948fe8300cd8a594f3"
+
+simple-statistics@5.1.0:
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/simple-statistics/-/simple-statistics-5.1.0.tgz#85eda0e7ea2fa62619c6ab22e243f5d45ad74ffd"
 
 slide@^1.1.5:
   version "1.1.6"
