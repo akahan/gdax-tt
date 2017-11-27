@@ -24,6 +24,7 @@ export class ExchangeFeedConfig {
     wsUrl: string;
     logger: Logger;
     auth: ExchangeAuthConfig;
+    heartBeatInterval?: number;
 }
 
 // hooks for replacing libraries if desired
@@ -35,6 +36,7 @@ export abstract class ExchangeFeed extends Readable {
     protected auth: ExchangeAuthConfig;
     protected url: string;
     protected _isConnecting: boolean;
+    protected heartBeatInterval: number;
     // keys in this list will be sanitised in log messages
     protected sensitiveKeys: string[];
     private lastHeartBeat: number = -1;
@@ -46,6 +48,7 @@ export abstract class ExchangeFeed extends Readable {
         super({ objectMode: true, highWaterMark: 1024 });
         this._logger = config.logger;
         this.url = config.wsUrl;
+        this.heartBeatInterval = config.heartBeatInterval || 30;
         this._isConnecting = false;
         this.auth = this.validateAuth(config.auth);
         this.sensitiveKeys = ['key', 'secret', 'signature'];
@@ -114,7 +117,7 @@ export abstract class ExchangeFeed extends Readable {
         });
         this.socket = socket;
         this.lastHeartBeat = -1;
-        this.connectionChecker = setInterval(() => this.checkConnection(30 * 1000), 5 * 1000);
+        this.connectionChecker = setInterval(() => this.checkConnection(this.heartBeatInterval * 1000), 5 * 1000);
     }
 
     protected abstract get owner(): string;

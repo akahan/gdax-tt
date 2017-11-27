@@ -43,7 +43,8 @@ export function getSubscribedFeeds(options: any, products: string[]): Promise<Po
             wsUrl: options.wsUrl || POLONIEX_WS_FEED,
             auth: options.auth,
             logger: options.logger,
-            tickerChannel: !!options.tickerChannel
+            tickerChannel: !!options.tickerChannel,
+            heartBeatInterval: options.heartBeatInterval,
         };
         const feed = getFeed<PoloniexFeed, ExchangeFeedConfig>(PoloniexFeed, config);
         if (!feed.isConnected()) {

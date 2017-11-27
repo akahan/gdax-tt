@@ -150,7 +150,7 @@ export class PoloniexFeed extends ExchangeFeed {
                 this.log('warn', 'Failed to send PING to Poloniex. We should resubscribe');
                 this.reconnect(250);
             }
-        }, 29000);
+        }, this.heartBeatInterval * 1000);
         if (this.tickerChannel) {
             this.subscribe(TICKER_CHANNEL);
         }
