@@ -31,6 +31,7 @@ class ExchangeFeed extends stream_1.Readable {
         this.connectionChecker = null;
         this._logger = config.logger;
         this.url = config.wsUrl;
+        this.heartBeatInterval = config.heartBeatInterval || 30;
         this._isConnecting = false;
         this.auth = this.validateAuth(config.auth);
         this.sensitiveKeys = ['key', 'secret', 'signature'];
@@ -56,7 +57,7 @@ class ExchangeFeed extends stream_1.Readable {
     reconnect(delay) {
         this._logger.log('debug', `Reconnecting to ${this.url} ${this.auth ? '(authenticated)' : ''} in ${delay * 0.001} seconds...`);
         // If applicable, close the current socket first
-        if (this.socket && this.socket.readyState < 2) {
+        if (this.socket && this.socket.readyState === 1) {
             this._logger.log('debug', 'Closing existing socket prior to reconnecting to ' + this.url);
             this.close();
         }
@@ -91,7 +92,7 @@ class ExchangeFeed extends stream_1.Readable {
         });
         this.socket = socket;
         this.lastHeartBeat = -1;
-        this.connectionChecker = setInterval(() => this.checkConnection(30 * 1000), 5 * 1000);
+        this.connectionChecker = setInterval(() => this.checkConnection(this.heartBeatInterval * 1000), 5 * 1000);
     }
     onClose(code, reason) {
         this.emit('websocket-closed');

@@ -40,11 +40,14 @@ function getSubscribedFeeds(options, products) {
             wsUrl: options.wsUrl || PoloniexCommon_1.POLONIEX_WS_FEED,
             auth: options.auth,
             logger: options.logger,
-            tickerChannel: !!options.tickerChannel
+            tickerChannel: !!options.tickerChannel,
+            heartBeatInterval: options.heartBeatInterval,
         };
         const feed = ExchangeFeed_1.getFeed(PoloniexFeed_1.PoloniexFeed, config);
         if (!feed.isConnected()) {
-            feed.reconnect(0);
+            if (!feed.isConnecting()) {
+                feed.reconnect(0);
+            }
             feed.once('websocket-open', () => {
                 subscribeToAll(products, feed, info);
             });

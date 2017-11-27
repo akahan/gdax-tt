@@ -21,6 +21,7 @@ export declare class ExchangeFeedConfig {
     wsUrl: string;
     logger: Logger;
     auth: ExchangeAuthConfig;
+    heartBeatInterval?: number;
 }
 export declare const hooks: {
     WebSocket: typeof WebSocket;
@@ -29,6 +30,7 @@ export declare abstract class ExchangeFeed extends Readable {
     protected auth: ExchangeAuthConfig;
     protected url: string;
     protected _isConnecting: boolean;
+    protected heartBeatInterval: number;
     protected sensitiveKeys: string[];
     private lastHeartBeat;
     private connectionChecker;

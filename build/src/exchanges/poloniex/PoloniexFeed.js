@@ -131,7 +131,7 @@ class PoloniexFeed extends ExchangeFeed_1.ExchangeFeed {
                 this.log('warn', 'Failed to send PING to Poloniex. We should resubscribe');
                 this.reconnect(250);
             }
-        }, 29000);
+        }, this.heartBeatInterval * 1000);
         if (this.tickerChannel) {
             this.subscribe(TICKER_CHANNEL);
         }
@@ -142,7 +142,7 @@ class PoloniexFeed extends ExchangeFeed_1.ExchangeFeed {
     onClose(code, reason) {
         super.onClose(code, reason);
         this.clear_pinger();
-        this.reconnect(1000);
+        // this.reconnect(1000);
     }
     handle_user_message(msg) {
         if (msg.length === 2 && msg[1] === 1) {
