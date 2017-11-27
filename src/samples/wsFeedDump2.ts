@@ -15,7 +15,7 @@
 import program  = require('commander');
 import { getSubscribedFeeds } from '../factories/gdaxFactories';
 import { ConsoleLoggerFactory } from '../utils/Logger';
-import { GDAXAuthConfig } from '../exchanges/gdax/GDAXExchangeAPI';
+import { GDAXAuthConfig } from '../exchanges/gdax/GDAXInterfaces';
 import { GDAXFeed, GDAXFeedConfig } from '../exchanges/gdax/GDAXFeed';
 
 program

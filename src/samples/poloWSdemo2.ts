@@ -13,7 +13,7 @@
  ***************************************************************************************************************************/
 
 import { ConsoleLoggerFactory } from '../utils/Logger';
-import { TickerMessage } from '../core/Messages';
+// import { TickerMessage } from '../core/Messages';
 import { getSubscribedFeeds } from '../factories/poloniexFactories';
 import { PoloniexFeed, PoloniexFeedConfig } from '../exchanges/poloniex/PoloniexFeed';
 // import { ExchangeAuthConfig } from '../exchanges/AuthConfig';
@@ -35,7 +35,7 @@ const config: PoloniexFeedConfig = {
 };
 
 getSubscribedFeeds(config, products).then((feed: PoloniexFeed) => {
-    feed.on('data', (msg: TickerMessage) => {
+    feed.on('data', (msg: any) => {
         if (msg.type !== 'snapshot' && products.includes(msg.productId)) {
             logger.log('info', JSON.stringify(msg));
         }
