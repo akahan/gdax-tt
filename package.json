@@ -8,7 +8,6 @@
     "lint": "tslint -c tslint.json -p . -t stylish",
     "pretest": "yarn run build",
     "build": "tsc -d -p .",
-    "watch": "tsc -w -d -p .",
     "coverage": "yarn run build && ./node_modules/.bin/nyc --reporter text-summary ./node_modules/.bin/mocha",
     "coverage:report": "./node_modules/.bin/nyc report --reporter text-summary --reporter html && open coverage/index.html",
     "test:mocha": "./node_modules/.bin/mocha",
@@ -17,6 +16,9 @@
     "doc": "yarn run readme && ./node_modules/.bin/typedoc --options typedoc.json .",
     "readme": "node generate-md.js",
     "prepublishOnly": "yarn run build"
+  },
+  "bin": {
+    "gdaxConsole": "./build/src/consoles/gdaxConsole.js"
   },
   "repository": {
     "type": "git",
