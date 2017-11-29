@@ -26,10 +26,10 @@ const BookBuilder_1 = require("../../lib/BookBuilder");
 const types_1 = require("../../lib/types");
 const gdax_1 = require("gdax");
 const assert = require("assert");
+const errors_1 = require("../../lib/errors");
 const request = require("superagent");
 const querystring = require("querystring");
 const crypto = require("crypto");
-const errors_1 = require("../../lib/errors");
 exports.GDAX_API_URL = 'https://api.gdax.com';
 class GDAXExchangeAPI {
     constructor(options) {
@@ -169,7 +169,6 @@ class GDAXExchangeAPI {
                 };
                 break;
             case 'market':
-            case 'stop':
                 gdaxOrder = {
                     type: 'market',
                     product_id: order.productId,
@@ -177,6 +176,18 @@ class GDAXExchangeAPI {
                     size: order.size,
                     client_oid: order.clientId,
                     funds: order.funds,
+                    stp: order.extra && order.extra.stp
+                };
+                break;
+            case 'stop':
+                gdaxOrder = {
+                    type: 'stop',
+                    product_id: order.productId,
+                    side: side,
+                    size: order.size,
+                    price: order.price,
+                    funds: order.funds,
+                    client_oid: order.clientId,
                     stp: order.extra && order.extra.stp
                 };
                 break;
@@ -228,11 +239,7 @@ class GDAXExchangeAPI {
                 }
             });
         };
-        return new Promise((resolve, reject) => {
-            return loop(null).then((orders) => {
-                return resolve(orders);
-            }, reject);
-        });
+        return loop(null);
     }
     loadBalances() {
         if (!this.authClient) {
@@ -454,9 +461,20 @@ class GDAXExchangeAPI {
 }
 exports.GDAXExchangeAPI = GDAXExchangeAPI;
 function GDAXOrderToOrder(order) {
-    const size = types_1.Big(order.size);
-    // this is actually the average price, since an order can me matched multiple times if it was a market order
-    const price = +order.executed_value > 0 ? types_1.Big(order.executed_value).div(size) : null;
+    let size;
+    let price;
+    if (+order.size > 0) {
+        size = types_1.Big(order.size);
+    }
+    else if (+order.funds > 0 && +order.price > 0) {
+        size = types_1.Big(order.funds).div(order.price);
+    }
+    if (+order.price > 0) {
+        price = types_1.Big(order.price);
+    }
+    else {
+        price = +order.executed_value > 0 ? types_1.Big(order.executed_value).div(size) : null;
+    }
     return {
         price: price,
         size: size,
