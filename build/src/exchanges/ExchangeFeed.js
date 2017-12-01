@@ -57,7 +57,7 @@ class ExchangeFeed extends stream_1.Readable {
     reconnect(delay) {
         this._logger.log('debug', `Reconnecting to ${this.url} ${this.auth ? '(authenticated)' : ''} in ${delay * 0.001} seconds...`);
         // If applicable, close the current socket first
-        if (this.socket && this.socket.readyState === 1) {
+        if (this.socket && this.socket.readyState < 2) {
             this._logger.log('debug', 'Closing existing socket prior to reconnecting to ' + this.url);
             this.close();
         }
