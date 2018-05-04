@@ -13,9 +13,13 @@
  ***************************************************************************************************************************/
 
 import { Logger } from '../utils/Logger';
-import { PoloniexFeed, PoloniexFeedConfig } from '../exchanges/poloniex/PoloniexFeed';
-import { gdaxToPolo, getAllProductInfo, POLONIEX_WS_FEED, PoloniexProducts } from '../exchanges/poloniex/PoloniexCommon';
-import { ExchangeFeedConfig, getFeed } from '../exchanges/ExchangeFeed';
+import { PoloniexFeed,
+         PoloniexFeedConfig } from '../exchanges/poloniex/PoloniexFeed';
+import { gdaxToPolo,
+         getAllProductInfo,
+         POLONIEX_WS_FEED,
+         PoloniexProducts } from '../exchanges/poloniex/PoloniexCommon';
+import { getFeed } from '../exchanges/ExchangeFeed';
 import { ExchangeAuthConfig } from '../exchanges/AuthConfig';
 import CCXTExchangeWrapper from '../exchanges/ccxt';
 
@@ -46,7 +50,7 @@ export function getSubscribedFeeds(options: any, products: string[]): Promise<Po
             tickerChannel: !!options.tickerChannel,
             heartBeatInterval: options.heartBeatInterval,
         };
-        const feed = getFeed<PoloniexFeed, ExchangeFeedConfig>(PoloniexFeed, config);
+        const feed = getFeed<PoloniexFeed, PoloniexFeedConfig>(PoloniexFeed, config);
         if (!feed.isConnected()) {
             if (!feed.isConnecting()) {
                 feed.reconnect(0);

@@ -35,20 +35,18 @@ export const serverOptions: IServerOptions = {
     clientTracking: true
 };
 
-let dataFeed: DataFeed = null;
-
 export function dataFeedFactory(): Server {
     if (server === undefined) {
         server = new Server(serverOptions);
-        logger.log('info', 'Websocket server listening on port ' + server.options.port);
-        server.on('connection', (socket: WebSocket) => {
-            dataFeed = new DataFeed(socket);
+        logger.log('info', `Websocket server listening on port ${server.options.port}`);
+        server.on('connection', (_socket: WebSocket) => {
+            logger.log('debug', 'Websocket connection made to ' + server.options.host);
         });
     }
     return server;
 }
 
-interface ExchangeConnection {
+export interface ExchangeConnection {
     feed: ExchangeFeed;
     products: string[];
     tickerTriggers: { [product: string]: Trigger<TickerMessage> };
@@ -66,9 +64,9 @@ function createLiveBook(feed: ExchangeFeed, product: string): LiveOrderbook {
     return book;
 }
 
-class DataFeed {
-    private socket: WebSocket;
-    private exchanges: { [exchange: string]: ExchangeConnection } = {};
+export class DataFeed {
+    private readonly socket: WebSocket;
+    private readonly exchanges: { [exchange: string]: ExchangeConnection } = {};
 
     constructor(socket: WebSocket) {
         this.socket = socket;
@@ -246,7 +244,7 @@ class DataFeed {
         if (!book) {
             return;
         }
-        const ticker: TickerMessage = { type: 'ticker', time: new Date(), ...book.ticker };
+        const ticker: TickerMessage = {type: 'ticker', time: new Date(), ...book.ticker};
         this.send(wrapMessage(ticker, cmd));
     }
 
@@ -259,7 +257,7 @@ class DataFeed {
             type: 'snapshot',
             time: new Date(),
             productId: cmd.product,
-            ... book.state()
+            ...book.state()
         };
         this.send(wrapMessage(msg, cmd));
     }

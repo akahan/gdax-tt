@@ -77,7 +77,7 @@ export default class BigArray {
         return this.values.length;
     }
 
-    sumTo(i: number) {
+    sumTo(i: number): BigJS {
         if (i < 0) {
             return ZERO;
         }
@@ -88,7 +88,7 @@ export default class BigArray {
         return i < n ? this.sumArray.values[i] : this.sumArray.values[n - 1];
     }
 
-    sum() {
+    sum(): BigJS {
         return this.sumTo(this.length - 1);
     }
 
@@ -132,7 +132,7 @@ export default class BigArray {
         if (len === 0) {
             return new BigArray([]);
         }
-        if (typeof big.prototype[op] !== 'function') {
+        if (typeof (big.prototype as any)[op] !== 'function') {
             throw new Error('Unsupported BigJS.js operation: ' + op);
         }
         const result = new Array(len);

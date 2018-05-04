@@ -16,6 +16,7 @@ import { ExchangeFeed, ExchangeFeedConfig } from '../ExchangeFeed';
 import { ChannelSubscription, PoloniexSnapshotLevel, PoloniexSnapshotMessage, PoloniexTrollboxMessage } from './PoloniexMessages';
 import { getProductInfo } from './PoloniexCommon';
 import { LevelMessage, SnapshotMessage, TickerMessage, TradeMessage, UnknownMessage } from '../../core/Messages';
+import { Side } from '../../lib/sides';
 import { Big, BigJS } from '../../lib/types';
 import Timer = NodeJS.Timer;
 import { OrderPool } from '../../lib/BookBuilder';
@@ -25,6 +26,8 @@ import { Product } from '../PublicExchangeAPI';
 const AUTH_CHANNEL = 1000;
 const TROLL_BOX = 1001;
 const TICKER_CHANNEL = 1002;
+const TOTAL_VOLUME_CHANNEL = 1003;
+const HEARTBEAT_CHANNEL = 1010;
 
 export interface PoloniexFeedConfig extends ExchangeFeedConfig {
     tickerChannel: boolean;
@@ -54,7 +57,7 @@ export class PoloniexFeed extends ExchangeFeed {
             command: 'subscribe',
             channel: channel
         };
-        if (channel === 1000) {
+        if (channel === AUTH_CHANNEL) {
             this.log('info', 'Authenticated feeds from Poloniex are not available from their API yet');
             return;
         }
@@ -111,13 +114,13 @@ export class PoloniexFeed extends ExchangeFeed {
             case TICKER_CHANNEL:
                 this.handle_ticker_message(msg);
                 return;
-            case 1003:
+            case TOTAL_VOLUME_CHANNEL:
                 this.handle_total_volume_message(msg);
                 return;
-            case 1010:
+            case HEARTBEAT_CHANNEL:
                 return; // Ignore ping
             default:
-                if (channelId > 0 && channelId < 1000) {
+                if (channelId > 0 && channelId < AUTH_CHANNEL) {
                     return this.handle_orderbook_message(msg);
                 }
                 return this.handle_unknown_system_message(msg);
@@ -166,12 +169,12 @@ export class PoloniexFeed extends ExchangeFeed {
 
     private handle_user_message(msg: any[]) {
         if (msg.length === 2 && msg[1] === 1) {
-            this.subscriptions[1000].connected = true;
+            this.subscriptions[AUTH_CHANNEL].connected = true;
             return;
         }
         // I don't know what these messages are yet, so just log them for now
         const message: UnknownMessage = {
-            type: 'poloniex-user',
+            type: 'unknown',
             time: new Date(),
             productId: null,
             sequence: null,
@@ -182,7 +185,7 @@ export class PoloniexFeed extends ExchangeFeed {
 
     private handle_trollbox_message(msg: any[]): void {
         if (msg.length === 2 && msg[1] === 1) {
-            this.subscriptions[1001].connected = true;
+            this.subscriptions[TROLL_BOX].connected = true;
             return;
         }
         const chat: PoloniexTrollboxMessage = {
@@ -222,7 +225,7 @@ export class PoloniexFeed extends ExchangeFeed {
 
     private handle_ticker_message(msg: any[]) {
         if (msg.length === 2 && msg[1] === 1) {
-            this.subscriptions[1002].connected = true;
+            this.subscriptions[TICKER_CHANNEL].connected = true;
             return;
         }
         const data: any[] = msg[2];
@@ -303,6 +306,9 @@ export class PoloniexFeed extends ExchangeFeed {
                     channelInfo.sequence = sequence;
                     const snapshot: SnapshotMessage = self.createSnapshotMessage(product, sequence, update[1]);
                     self.push(snapshot);
+                    process.nextTick(() => {
+                        self.emit('snapshot', snapshot.productId);
+                    });
                     return;
                 }
                 if (type === 'o') {
@@ -352,7 +358,7 @@ export class PoloniexFeed extends ExchangeFeed {
             const levelArray: PoloniexSnapshotLevel = snapshot.orderBook[i];
             const sideArray: PriceLevelWithOrders[] = i === 0 ? snapshotMessage.asks : snapshotMessage.bids;
             for (const price in snapshot.orderBook[i]) {
-                const side: string = i === 0 ? 'sell' : 'buy';
+                const side: Side = i === 0 ? 'sell' : 'buy';
                 const size: BigJS = Big(levelArray[price]);
                 const newOrder: Level3Order = {
                     id: String(price),

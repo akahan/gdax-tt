@@ -12,8 +12,12 @@
  * License for the specific language governing permissions and limitations under the License.                              *
  ***************************************************************************************************************************/
 
-import { Logger } from '../utils/Logger';
-import { BaseOrderMessage, ChangedOrderMessage, isOrderMessage, isStreamMessage, NewOrderMessage, StreamMessage } from './Messages';
+import { BaseOrderMessage,
+         ChangedOrderMessage,
+         isBaseOrderMessage,
+         isStreamMessage,
+         NewOrderMessage,
+         StreamMessage } from './Messages';
 import { RBTree } from 'bintrees';
 import { Duplex } from 'stream';
 import { MessageTransformConfig } from '../lib/AbstractMessageTransform';
@@ -40,16 +44,14 @@ export interface HFTFilterStats {
  * re-order any messages that may have arrived out of order
  */
 export class HFTFilter extends Duplex {
-    private logger: Logger;
     private messages: RBTree<StreamMessage>;
     private messagesById: { [id: string]: BaseOrderMessage };
     private skippedMessages: number = 0;
     private tradesSkipped: number = 0;
-    private targetQueueLength: number;
+    private readonly targetQueueLength: number;
 
     constructor(config: HFTFilterConfig) {
         super({ readableObjectMode: true, writableObjectMode: true });
-        this.logger = config.logger;
         this.targetQueueLength = config.targetQueueLength;
         this.clearQueue();
     }
@@ -82,9 +84,8 @@ export class HFTFilter extends Duplex {
      * Add the message to the queue
      */
     addMessage(message: StreamMessage): boolean {
-        if (isOrderMessage(message)) {
-            const order = message as BaseOrderMessage;
-            this.messagesById[order.orderId] = order;
+        if (isBaseOrderMessage(message)) {
+            this.messagesById[message.orderId] = message;
         }
         this.messages.insert(message);
         return true;
@@ -141,8 +142,8 @@ export class HFTFilter extends Duplex {
         const node = this.messages.min();
         if (node) {
             assert(this.messages.remove(node));
-            if (isOrderMessage(node)) {
-                delete this.messagesById[(node as BaseOrderMessage).orderId];
+            if (isBaseOrderMessage(node)) {
+                delete this.messagesById[node.orderId];
             }
         }
         return node;
@@ -176,9 +177,9 @@ export class HFTFilter extends Duplex {
     /**
      * If this stream has another stream piped into it, we just pass the data into the READABLE stream's filter
      */
-    _write(chunk: any, encoding: string, callback: (err: Error) => void) {
+    _write(chunk: any, _encoding: string, callback: (err: Error) => void) {
         if (typeof chunk === 'object' && isStreamMessage(chunk)) {
-            this.filterMessage(chunk as StreamMessage);
+            this.filterMessage(chunk);
             return callback(null);
         }
         // Maybe the messages have been serialised as strings
@@ -187,7 +188,7 @@ export class HFTFilter extends Duplex {
         try {
             const message = JSON.parse(data);
             if (isStreamMessage(message)) {
-                this.filterMessage(message as StreamMessage);
+                this.filterMessage(message);
                 return callback(null);
             }
         } catch (e) {
